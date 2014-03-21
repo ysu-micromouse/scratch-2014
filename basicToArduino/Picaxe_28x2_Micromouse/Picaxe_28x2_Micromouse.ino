@@ -329,26 +329,25 @@ ptrl=ptrl+1
 }
 
 
-right_wheel_counter: 'count right wheel counter to the value of b8
+void right_wheel_counter() { // right_wheel_counter: 'count right wheel counter to the value of b8
 
-b47=0
+  b47 = 0; //b47=0
 
-do
-last_wheel=pinc.3
-
-do while last_wheel=pinc.3 'wait for right wheel counter to change
+  do //do
+  {
+    last_wheel = pinc.3; //last_wheel=pinc.3
+    
+    do //do while last_wheel=pinc.3 'wait for right wheel counter to change
+    {
 @ptr=@ptr and 247
 ptrl=ptrl+1
-loop
+    } while (last_wheel == pinc.3); //loop
+    
+    b47 += 1; //b47=b47+ 1
+  } while (b47 != b48); // loop until b47=b48
 
-b47=b47+ 1
-
-loop until b47=b48
-
-return
-
-
-
+  return; //return
+}
 
 
 direction_check:
