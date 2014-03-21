@@ -350,33 +350,44 @@ ptrl=ptrl+1
 }
 
 
-direction_check:
-if front_sensor> front_wall then
-switch on middle_green_led 'middle green led on if wall is detected
-wall_config=wall_config+ 4 'wall config walue for current cell
-else
-switch off middle_green_led
-endif
+void direction_check() { //direction_check:
+  if (front_sensor > front_wall) //if front_sensor> front_wall then
+  {
+    digitalWrite(middle_green_led, HIGH); //switch on middle_green_led 'middle green led on if wall is detected
+    wall_config += 4; //wall_config=wall_config+ 4 'wall config walue for current cell
+  }
+  else //else
+  {
+    digitalWrite(middle_green_led, LOW); //switch off middle_green_led
+  } //endif
 
 pwmout motor_right,255,0 'stop right motor untill next move is decided
-pause 20 'adjusted to ensure mouse stops with no twist
+  delay(20); //pause 20 'adjusted to ensure mouse stops with no twist
 pwmout motor_left,255,0 'stop left motor untill next move is decided
 
-
-sensor=wall_config
-gosub check_cell
-b46=b8
+  sensor = wall_config; //sensor=wall_config
+  check_cell(); //gosub check_cell
+  b46 = b8; //b46=b8
 pwmout motor_right,255,right_motor
-pause 35 'ajusted to ensure mouse starts with no twist
+  delay(35); //pause 35 'ajusted to ensure mouse starts with no twist
 pwmout motor_left,255,left_motor
 
-
-on b46 gosub turn_round,straight,right_turn,left_turn
-
-return
-
-
-
+  switch (b46) { //on b46 gosub turn_round,straight,right_turn,left_turn
+    case 0:
+      turn_round();
+      break;
+    case 1:
+      straight();
+      break;
+    case 2:
+      right_turn();
+      break;
+    case 3:
+      left_turn();
+      break;
+  }
+  
+  return; //return
 
 
 Maze_setup:

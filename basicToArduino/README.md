@@ -19,7 +19,7 @@ Referring to all the sub-routines that need to be converted to Arduino.
 [ ] turn_round
 [P] left_wheel_counter
 [P] right_wheel_counter
-[ ] direction_check
+[P] direction_check
 [ ] maze_setup
 [ ] check_cell
 [ ] go_left
