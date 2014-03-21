@@ -310,24 +310,23 @@ pwmout motor_left,255,left_motor
 return
 
 
-left_wheel_counter: 'count left wheel counter to the value of b8
+void left_wheel_counter() { //left_wheel_counter: 'count left wheel counter to the value of b8
 
-b47=0
+  b47 = 0; //b47=0
 
-do
-last_wheel=pinc.0
-
-do while last_wheel=pinc.0 'wait for left wheel counter to change
+  do //do
+  {
+    last_wheel = pinc.0; //last_wheel=pinc.0
+    do // do while last_wheel=pinc.0 'wait for left wheel counter to change
+    {
 @ptr=@ptr and 247
 ptrl=ptrl+1
-loop
+    } while (last_wheel == pinc.0); //loop
+    b47 += 1; //b47=b47+ 1
+  } while (b47 != b48); //loop until b47=b48
 
-b47=b47+ 1
-
-loop until b47=b48
-
-return
-
+  return; //return
+}
 
 
 right_wheel_counter: 'count right wheel counter to the value of b8
