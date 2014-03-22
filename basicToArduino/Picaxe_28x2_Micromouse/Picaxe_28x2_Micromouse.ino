@@ -417,118 +417,160 @@ void maze_setup() { //Maze_setup: 'Setup maze for new run
 }
 
 
-check_cell: 'check if direction required for PIC28 called when pin 6 is High
+void check_cell() { //check_cell: 'check if direction required for PIC28 called when pin 6 is High
 
-
-         If pos = Target Then 'if at target swap to go back to start/center
-          gosub save_maze
-          solvit = 1
-                 If Target = maze_center Then
-                         Target = maze_start
-                         switch on green_led
-                 Else
-                       Target = maze_center
-                       switch off green_led
-                       b39=b39+1
-                       if b39 = 2 then
-                        gosub fill_maze
-                       endif
-                 End If
-                 gosub solve_maze
-end if
-        
-
-        
-        get pos, map_walls 'get the maze map info for the position of the mouse
-
-        If w_visited = 0 Then 'if already been here dont store the walls again
-                solvit = 1
-        else
-         if solvit = 1 then
-         if sensor=0 or sensor=1 or sensor=2 or sensor=4 then
-         GoSub solve_maze
-                   solvit = 0
-                   clear_the_maze = 1
-                   get pos, map_walls
-                  endif
-         endif
-        
-        End If
-        
-       
-        
-        Do
-                Select Case sensor
-                        Case 3
-                                b8 = 1 'if walls both sides and no front wall always go forward
-                        Case 5
-                                b8 = 2
-                        Case 6
-                                b8 = 3
-                        Case 7
-                                b8 = 0
-                        Else
-                                    b8=map_walls & %00000011
-                                select case direc 'convert to wall map bits depending on the direction of the mouse
-                                        Case 0
-                                                lookup b8,(1,2,0,3),b8 'mouse facing north
-                                        Case 1
-                                                lookup b8,(3,1,2,0),b8 'mouse facing east
-                                        Case 2
-                                                lookup b8,(0,3,1,2),b8 'mouse facing south
-                                        Case 3
-                                                lookup b8,(2,0,3,1),b8 'mouse facing west
-                                endselect
-                                
-                                If solvit = 1 Then
-                                        Select Case b8
-                                                
-                                                Case 0
-                                                        b8 = 100
-                                                Case 1
-                                                        If sensor = 4 Then
-                                                                b8 = 100
-                                                        End If
-                                                Case 2
-                                                        If sensor = 2 Then
-                                                                b8 = 100
-                                                        End If
-                                                Case 3
-                                                        If sensor = 1 Then
-                                                                b8 = 100
-                                                        End If
-                                        endselect
-                                End If
-                endselect
-                
-                
-                If b8 = 100 Then
-                 If w_visited = 0 Then
-                         GoSub write_the_mazemap
-                        endif
-                        GoSub solve_maze
-                        solvit = 0
-                        clear_the_maze = 1
-                        get pos, map_walls
-                        
-                End If
-
-        Loop Until b8 < 100
-        
-        
-        If w_visited = 0 Then
-                GoSub write_the_mazemap
-                solvit=1
-        End If
+  if (pos == Target) //If pos = Target Then 'if at target swap to go back to start/center
+  {
+    save_maze(); //gosub save_maze
+    solvit = 1; //solvit = 1
     
-        get pos, map_walls
+    if (Target == maze_center) //If Target = maze_center Then
+    {
+      Target = maze_start; //Target = maze_start
+      digitalWrite(green_led, HIGH); //switch on green_led
+    }
+    else //Else
+    {
+      Target = maze_center; //Target = maze_center
+      digitalWrite(green_led, LOW); //switch off green_led
+      b39 += 1; //b39=b39+1
+      
+      if (b39 == 2) //if b39 = 2 then
+      {
+        fill_maze(); //gosub fill_maze
+      } //endif
+      
+    } //End If
+    
+    solve_maze(); //gosub solve_maze
+  } //end if
+  
+get pos, map_walls 'get the maze map info for the position of the mouse
 
+  if (w_visited == 0) //If w_visited = 0 Then 'if already been here dont store the walls again
+  {
+    solvit = 1; //solvit = 1
+  }
+  else //else
+  {
+    if (sovlit == 1) //if solvit = 1 then
+    {
+      if (sensor == 0 || sensor == 1 || sensor == 2 || sensor == 4) //if sensor=0 or sensor=1 or sensor=2 or sensor=4 then
+      {
+        solve_maze(); //GoSub solve_maze
+        solvit = 0; // solvit = 0
+        clear_the_maze = 1; // clear_the_maze = 1
+get pos, map_walls
+      } //endif
+    } //endif  
+  } //End If
+        
+  do //Do
+  {
+    select (sensor) //Select Case sensor
+    {
+      case 3: //Case 3
+        b8 = 1; //b8 = 1 'if walls both sides and no front wall always go forward
+        break;
+      case 5: //Case 5
+        b8 = 1; //b8 = 2
+        break;
+      case 6: //Case 6
+        b8 = 3; //b8 = 3
+        break;
+      case 7: //Case 7
+        b8 = 0; //b8 = 0
+        break;
+      default: //Else
+b8=map_walls & %00000011
 
-        On b8 GoSub go_round, go_forward, go_right, go_left
+        select (direc) //select case direc 'convert to wall map bits depending on the direction of the mouse
+        {
+          case 0: // Case 0
+            b8 = int("1203"[b8]); // lookup b8,(1,2,0,3),b8 'mouse facing north
+            break;
+          case 1: //Case 1
+            b8 = int("3120"[b8]); //lookup b8,(3,1,2,0),b8 'mouse facing east
+            break;
+          case 2: //Case 2
+            b8 = int("0312"[b8]); //lookup b8,(0,3,1,2),b8 'mouse facing south
+            break;
+          case 3: //Case 3
+            b8 = int("2031"[b8]); //lookup b8,(2,0,3,1),b8 'mouse facing west
+            break;
+        } //endselect
         
-        switch off yellow_led
-        
-Return
+        if (solvit == 1) // If solvit = 1 Then
+        {
+          select (b8) // Select Case b8
+          {
+            case 0: // Case 0
+              b8 = 100; // b8 = 100
+              break;
+            case 1: // Case 1
+              if (sensor == 4) // If sensor = 4 Then
+              {
+                b8 = 100; // b8 = 100
+              } // End If
+              break;
+            case 2: // Case 2
+              if (sensor == 2) // If sensor = 2 Then
+              {
+                b8 = 100; // b8 = 100
+              } // End If
+              break;
+            case 3: // Case 3
+              if (sensor == 1) // If sensor = 1 Then
+              {
+                b8 = 100; // b8 = 100
+              } // End If
+              break;
+          } // endselect
+        } // End If
+    } // endselect
+    
+    if (b8 == 100) //If b8 = 100 Then
+    {
+      if (w_visited == 0) // If w_visited = 0 Then
+      {
+        write_the_mazemap(); // GoSub write_the_mazemap
+      } // endif
+      
+      solve_maze(); // GoSub solve_maze
+      solvit = 0; // solvit = 0
+      clear_the_maze = 1; // clear_the_maze = 1
+get pos, map_walls
+    } // End If
+  } while (b8 >= 100); // Loop Until b8 < 100
+  
+  if (w_visited == 0) // If w_visited = 0 Then
+  {
+    write_the_mazemap(); // GoSub write_the_mazemap
+    solvit = 1; // solvit=1
+  } // End If
+  
+get pos, map_walls
+
+  switch (b8) // On b8 GoSub go_round, go_forward, go_right, go_left
+  {
+    case 0:
+      go_round();
+      break;
+    case 1:
+      go_forward();
+      break;
+    case 2:
+      go_right();
+      break;
+    case 3:
+      go_left();
+      break;
+  }
+  
+  digitalWrite(yellow_led, LOW); // switch off yellow_led
+  
+  return; // Return
+}
 
 go_left: 'Mouse turning left
         dec direc
