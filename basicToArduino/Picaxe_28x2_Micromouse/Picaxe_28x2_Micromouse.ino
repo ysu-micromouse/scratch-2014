@@ -572,21 +572,25 @@ get pos, map_walls
   return; // Return
 }
 
-go_left: 'Mouse turning left
-        dec direc
-        If direc = 255 Then
-                direc = 3
-        End If
-        GoTo go_forward
-Return
+void go_left() { //go_left: 'Mouse turning left
+  direc--; // dec direc
+  if (direc == 255) // If direc = 255 Then
+  {
+    direc = 3; // direc = 3
+  } // End If
+  go_forward(); // GoTo go_forward
+  return; //Return
+}
 
-go_right: 'Mouse turning right
-        inc direc
-        If direc = 4 Then
-                direc = 0
-        End If
-        GoTo go_forward
-Return
+void go_right() { // go_right: 'Mouse turning right
+  direc++; // inc direc
+  if (direc == 4) // If direc = 4 Then
+  {
+    direc = 0; // direc = 0
+  } // End If
+  go_forward(); // GoTo go_forward
+  return; // Return
+}
 
 go_round: 'Mouse to do a U turn
         direc = direc + 2
