@@ -388,34 +388,33 @@ pwmout motor_left,255,left_motor
   }
   
   return; //return
+}
 
+void maze_setup() { //Maze_setup: 'Setup maze for new run
 
-Maze_setup:
-        'Setup maze for new run
-        
-        
-        if button_a = 0 then
-         GoSub clear_maze 'if button pressed then reset the maze map
-gosub save_maze
-        else
-         gosub restore_maze
-         GoSub clear_maze_bits 'Rest the maze for solving
-        end if
-        
-        switch on yellow_led
-        
-        Target = maze_center 'first run to the center
-        pos = maze_start - 16 'start in bottom left square (mouse always starts with a forward move so asume start one square forward)
-        direc = 0 'facing north
-        solvit = 0
-                
-        GoSub solve_maze 'solve the maze
-        
-        switch off yellow_led 'mouse ready to go when yellow led is off
-        
-        return
-        
-        
+  if (button_a == 0) //if button_a = 0 then
+  {
+    clear_maze(); //GoSub clear_maze 'if button pressed then reset the maze map
+    save_maze(); //gosub save_maze
+  }
+  else //else
+  {
+    restore_maze(); //gosub restore_maze
+    clear_maze_bits(); //GoSub clear_maze_bits 'Rest the maze for solving
+  } //end if
+
+  digitalWrite(yellow_led, HIGH); //switch on yellow_led
+
+  Target = maze_center; //Target = maze_center 'first run to the center
+  pos = maze_start - 16; //pos = maze_start - 16 'start in bottom left square (mouse always starts with a forward move so asume start one square forward)
+  direc = 0; //direc = 0 'facing north
+  solvit = 0; //solvit = 0
+  solve_maze(); //GoSub solve_maze 'solve the maze
+
+  digitalWrite(yellow_led, LOW); //switch off yellow_led 'mouse ready to go when yellow led is off
+  
+  return; //return
+}
 
 
 check_cell: 'check if direction required for PIC28 called when pin 6 is High
