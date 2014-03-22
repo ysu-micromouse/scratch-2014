@@ -592,13 +592,15 @@ void go_right() { // go_right: 'Mouse turning right
   return; // Return
 }
 
-go_round: 'Mouse to do a U turn
-        direc = direc + 2
-        If direc > 3 Then
-                direc = direc - 4
-        End If
-        GoTo go_forward
-Return
+void go_round() { // go_round: 'Mouse to do a U turn
+  direc += 2; // direc = direc + 2
+  if (direc > 3) // If direc > 3 Then
+  {
+    direc -= 4; // direc = direc - 4
+  } // End If
+  go_forward(); // GoTo go_forward
+  return; // Return
+}
 
 go_forward: 'mouse moving forward (Also move forward after a turn)
 
