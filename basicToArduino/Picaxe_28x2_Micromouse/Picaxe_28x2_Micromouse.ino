@@ -15,27 +15,28 @@ EXAMPLE:
 
  */
 
+/* Change these values to calibrate motor and sensors */
+unsigned int left_motor = 1018; // symbol left_motor=1018 'sets left motor speed for straight line max 1023
+unsigned int right_motor = 1023; // symbol right_motor=1023 'sets right motor speed for straight line max 1023
+unsigned int slowleft_motor = 850; // symbol slowleft_motor=850 'slower speed for straightening
+unsigned int slowright_motor = 850; // symbol slowright_motor=850 'slower speed for straightening
+unsigned int left_wall = 8; // symbol left_wall=8 'sets left wall detection
+unsigned int right_wall = 8; // symbol right_wall=8 'sets right wall detection
+unsigned int front_wall = 6; // symbol front_wall=6 'sets front wall detection
+unsigned int reset_frontwall = 17; // symbol reset_frontwall=17 'resets wheel counter if deadend is found
+unsigned int left_straighten = 41; // symbol left_straighten=41 'value of left sensor if no straightening required
+unsigned int right_straighten = 41; // symbol right_straighten=41 'value of right sensor if no straightening required
+unsigned int straight_before_right = 11; // symbol straight_before_right=11 'sets distance of short straight before right turn
+unsigned int angle_right = 81; // symbol angle_right=81 'sets amount of right turn
+unsigned int straight_after_right = 58; // symbol straight_after_right=58 'sets distance of short straight after right turn (lower number to travel further)
+unsigned int straight_before_left = 11; // symbol straight_before_left=11 'sets distance of short straight before left turn
+unsigned int angle_left = 82; // symbol angle_left=82 'sets amount of left turn
+unsigned int straight_after_left = 74; // symbol straight_after_left=74 'sets distance of short straight after left turn (lower number to travel further)
+unsigned int straight_turnround = 50; // symbol straight_turnround=50 'distance travelled into deadend before turn round
+unsigned int angle_turnround = 78; // symbol angle_turnround=78 'sets amount of turn round
+unsigned int end_wall = 80; // symbol end_wall=80 'front wall trigger in dead end
 
-symbol left_motor=1018 'sets left motor speed for straight line max 1023
-symbol right_motor=1023 'sets right motor speed for straight line max 1023
-symbol slowleft_motor=850 'slower speed for straightening
-symbol slowright_motor=850 'slower speed for straightening
-symbol left_wall=8 'sets left wall detection
-symbol right_wall=8 'sets right wall detection
-symbol front_wall=6 'sets front wall detection
-symbol reset_frontwall=17` 'resets wheel counter if deadend is found
-symbol left_straighten=41 'value of left sensor if no straightening required
-symbol right_straighten=41 'value of right sensor if no straightening required
-symbol straight_before_right=11 'sets distance of short straight before right turn
-symbol angle_right=81 'sets amount of right turn
-symbol straight_after_right=58 'sets distance of short straight after right turn (lower number to travel further)
-symbol straight_before_left=11 'sets distance of short straight before left turn
-symbol angle_left=82 'sets amount of left turn
-symbol straight_after_left=74 'sets distance of short straight after left turn (lower number to travel further)
-symbol straight_turnround=50 'distance travelled into deadend before turn round
-symbol angle_turnround=78 'sets amount of turn round
-symbol end_wall=80 'front wall trigger in dead end
-
+/* Pin assigments */
 symbol button_A = pinC.4 'Button A
 symbol start_button = pinC.6
 symbol middle_green_led = 6
@@ -55,8 +56,8 @@ symbol wall_config = b43
 symbol last_wheel = bit16
 
 
-'PicOne maze solver symbols
-
+/* 'PicOne maze solver symbols */
+/* The following symbols are linked. Need to figure out how to link them in Arduino/C. */
 symbol map_walls = b0 'this is overlaid by the folwing 8 sysbols
 symbol w_north = bit5 '1 if wall to north
 symbol w_south = bit7 '1 if wall to south
@@ -100,8 +101,8 @@ symbol temp2 = b6
 symbol maze_start=$F0
 symbol maze_center= $78 '$78=Center for 16X16 maze
 
-#no_data
-#no_table
+// #no_data
+// #no_table
 
 main:
 

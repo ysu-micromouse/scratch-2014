@@ -7,7 +7,7 @@ Referring to all the sub-routines that need to be converted to Arduino.
 [P] = Partially Complete
 [X] = Complete
 
-[ ] All those symbols (init)
+[P] All those symbols (init)
 [ ] main
 [ ] steer_straight
 [ ] forward_loop
