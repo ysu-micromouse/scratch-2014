@@ -972,22 +972,24 @@ void led_thing() { //LED_thing:
 End
 
 
-led_thing_2:
+void led_thing_2() { // led_thing_2:
 
-      switch off middle_green_led
-switch on green_led
-pause 100
-switch off left_red_led
-switch on yellow_led
-pause 100
-switch off green_led
-switch on right_red_led
-pause 100
-switch off yellow_led
-switch on middle_green_led
-pause 100
-switch off right_red_led
-switch on left_red_led
-pause 100
+  digitalWrite(middle_green_led, LOW); // switch off middle_green_led
+  digitalWrite(green_led, HIGH); // switch on green_led
+  delay(100); // pause 100
+  digitalWrite(left_red_led, LOW); // switch off left_red_led
+  digitalWrite(yellow_led, HIGH); // switch on yellow_led
+  delay(100); // pause 100
+  digitalWrite(green_led, LOW); // switch off green_led
+  digitalWrite(right_red_led, HIGH); // switch on right_red_led
+  delay(100); // pause 100
+  digitalWrite(yellow_led, LOW); // switch off yellow_led
+  digitalWrite(middle_green_led, HIGH); // switch on middle_green_led
+  delay(100); // pause 100
+  digitalWrite(right_red_led, LOW); // switch off right_red_led
+  digitalWrite(left_red_led, HIGH); // switch on left_red_led
+  delay(100); // pause 100
+  
+  return; // return
+}
 
-return
