@@ -487,16 +487,16 @@ b8=map_walls & %00000011
         select (direc) //select case direc 'convert to wall map bits depending on the direction of the mouse
         {
           case 0: // Case 0
-            b8 = int("1203"[b8]); // lookup b8,(1,2,0,3),b8 'mouse facing north
+            b8 = {1,2,0,3}[b8]; // lookup b8,(1,2,0,3),b8 'mouse facing north
             break;
           case 1: //Case 1
-            b8 = int("3120"[b8]); //lookup b8,(3,1,2,0),b8 'mouse facing east
+            b8 = {3,1,2,0}[b8]; //lookup b8,(3,1,2,0),b8 'mouse facing east
             break;
           case 2: //Case 2
-            b8 = int("0312"[b8]); //lookup b8,(0,3,1,2),b8 'mouse facing south
+            b8 = {0,3,1,2}[b8]; //lookup b8,(0,3,1,2),b8 'mouse facing south
             break;
           case 3: //Case 3
-            b8 = int("2031"[b8]); //lookup b8,(2,0,3,1),b8 'mouse facing west
+            b8 = {2,0,3,1}[b8]; //lookup b8,(2,0,3,1),b8 'mouse facing west
             break;
         } //endselect
         
@@ -572,6 +572,7 @@ get pos, map_walls
   return; // Return
 }
 
+
 void go_left() { //go_left: 'Mouse turning left
   direc--; // dec direc
   if (direc == 255) // If direc = 255 Then
@@ -581,6 +582,7 @@ void go_left() { //go_left: 'Mouse turning left
   go_forward(); // GoTo go_forward
   return; //Return
 }
+
 
 void go_right() { // go_right: 'Mouse turning right
   direc++; // inc direc
@@ -592,6 +594,7 @@ void go_right() { // go_right: 'Mouse turning right
   return; // Return
 }
 
+
 void go_round() { // go_round: 'Mouse to do a U turn
   direc += 2; // direc = direc + 2
   if (direc > 3) // If direc > 3 Then
@@ -602,20 +605,24 @@ void go_round() { // go_round: 'Mouse to do a U turn
   return; // Return
 }
 
-go_forward: 'mouse moving forward (Also move forward after a turn)
 
-        Select Case direc
-        Case 0
-                pos = pos - 16 'move north
-        Case 1
-                inc pos 'move east
-        Case 2
-                pos = pos + 16 'move south
-        Case 3
-                dec pos 'move west
-        endselect
-        
-Return
+void go_forward() { //go_forward: 'mouse moving forward (Also move forward after a turn)
+  switch (direc) { // Select Case direc
+    case 0: // Case 0
+      pos -= 16; // pos = pos - 16 'move north
+      break;
+    case 1: // Case 1
+      pos++; // inc pos 'move east
+      break;
+    case 2: // Case 2
+      pos += 16; // pos = pos + 16 'move south
+      break;
+    case 3: // Case 3
+      pos--; // dec pos 'move west
+      break;
+  } // endselect
+  return; // Return
+}
 
 
 write_the_mazemap: 'Add new walls to the maze map
