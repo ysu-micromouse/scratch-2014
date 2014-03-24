@@ -36,6 +36,6 @@ Referring to all the sub-routines that need to be converted to Arduino.
 [ ] clear_maze
 [ ] list_maze
 [ ] maze_unsolvable
-[ ] led_thing
+[X] led_thing
 [ ] led_thing_2
 ```

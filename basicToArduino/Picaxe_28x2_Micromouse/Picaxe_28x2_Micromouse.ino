@@ -939,35 +939,36 @@ endif
 goto maze_unsolvable
 
 
-LED_thing:
+void led_thing() { //LED_thing:
 
-      switch off yellow_led
-switch on green_led
-pause 100
-switch off green_led
-switch on yellow_led
-pause 75
-switch off yellow_led
-switch on right_red_led
-pause 50
-switch off right_red_led
-switch on middle_green_led
-pause 75
-switch off middle_green_led
-switch on left_red_led
-pause 100
-switch off left_red_led
-switch on middle_green_led
-pause 75
-switch off middle_green_led
-switch on right_red_led
-pause 50
-switch off right_red_led
-switch on yellow_led
-pause 75
+  digitalWrite(yellow_led, LOW); // switch off yellow_led
+  digitalWrite(green_led, HIGH); // switch on green_led
+  delay(100); // pause 100
+  digitalWrite(green_led, LOW); // switch off green_led
+  digitalWrite(yellow_led, HIGH); // switch on yellow_led
+  delay(75); // pause 75
+  digitalWrite(yellow_led, LOW); // switch off yellow_led
+  digitalWrite(right_red_led, HIGH); // switch on right_red_led
+  delay(50); // pause 50
+  digitalWrite(right_red_led, LOW); // switch off right_red_led
+  digitalWrite(middle_green_led, HIGH); // switch on middle_green_led
+  delay(75); // pause 75
+  digitalWrite(middle_green_led, LOW); // switch off middle_green_led
+  digitalWrite(left_red_led, HIGH); // switch on left_red_led
+  delay(100); // pause 100
+  digitalWrite(left_red_led, LOW); // switch off left_red_led
+  digitalWrite(middle_green_led, HIGH); // switch on middle_green_led
+  delay(75); // pause 75
+  digitalWrite(middle_green_led, LOW); // switch off middle_green_led
+  digitalWrite(right_red_led, HIGH); // switch on right_red_led
+  delay(50); // pause 50
+  digitalWrite(right_red_led, LOW); // switch off right_red_led
+  digitalWrite(yellow_led, HIGH); // switch on yellow_led
+  delay(75); // pause 75
+  
+  return; // return
+}
 
-return
- 
 End
 
 
