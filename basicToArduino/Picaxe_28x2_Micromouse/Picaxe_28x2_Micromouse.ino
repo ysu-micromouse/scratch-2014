@@ -625,26 +625,27 @@ void go_forward() { //go_forward: 'mouse moving forward (Also move forward after
 }
 
 
-write_the_mazemap: 'Add new walls to the maze map
-
-                select case direc 'convert to wall map bits depending on the direction of the mouse
-                 'Also sets viseted bit for this square
-                Case 0
-                        lookup sensor,(4,20,68,84,36,52,100,116),b53 'mouse facing north
-                Case 1
-                        lookup sensor,(4,36,132,164,68,100,196,228),b53 'mouse facing east
-                Case 2
-                        lookup sensor,(4,68,20,84,132,196,148,212),b53 'mouse facing south
-                Case 3
-                        lookup sensor,(4,132,36,164,20,148,52,180),b53 'mouse facing west
-                endselect
-                
-
-                map_walls = map_walls | b53
-
-                put pos,map_walls
-
-Return
+void write_the_mazemap() { //write_the_mazemap: 'Add new walls to the maze map
+  switch (direc) { // select case direc 'convert to wall map bits depending on the direction of the mouse
+                   // 'Also sets viseted bit for this square
+    case 0: // Case 0
+      b53 = {4,20,68,84,36,52,100,116}[sensor]; // lookup sensor,(4,20,68,84,36,52,100,116),b53 'mouse facing north
+      break;
+    case 1: // Case 1
+      b53 = {4,36,132,164,68,100,196,228}[sensor]; // lookup sensor,(4,36,132,164,68,100,196,228),b53 'mouse facing east
+      break;
+    case 2: // Case 2
+      b53 = {4,68,20,84,132,196,148,212}[sensor]; // lookup sensor,(4,68,20,84,132,196,148,212),b53 'mouse facing south
+      break;
+    case 3: // Case 3
+      b53 = {4,132,36,164,20,148,52,180}[sensor]; // lookup sensor,(4,132,36,164,20,148,52,180),b53 'mouse facing west
+      break;
+  } // endselect
+  
+  map_walls = map_walls | b53; // map_walls = map_walls | b53
+put pos,map_walls
+  return; // Return
+}
 
 
 solve_maze: 'Solve the maze
