@@ -16,8 +16,10 @@ EXAMPLE:
  */
 
 /* Change these values to calibrate motor and sensors */
-unsigned int left_motor = 1018; // symbol left_motor=1018 'sets left motor speed for straight line max 1023
-unsigned int right_motor = 1023; // symbol right_motor=1023 'sets right motor speed for straight line max 1023
+const int left_motor = 90; //0 to 90: stopped to full-speed //symbol left_motor=1018 'sets left motor speed for straight line max 1023
+const int right_motor = 90; //0 to 90: stopped to full-speed //symbol right_motor=1023 'sets right motor speed for straight line max 1023
+const int motor_right_pin = 12; // arduino pwm pin for right motor
+const int motor_left_pin = 13; // arduino pwm pin for left motor
 unsigned int slowleft_motor = 850; // symbol slowleft_motor=850 'slower speed for straightening
 unsigned int slowright_motor = 850; // symbol slowright_motor=850 'slower speed for straightening
 unsigned int left_wall = 8; // symbol left_wall=8 'sets left wall detection
@@ -46,8 +48,8 @@ symbol yellow_led = 0 ;
 symbol green_led = 5
 symbol sensor = b7 'sensor reading from pic28
 symbol sensor_leds = c.5 'IR leds
-int motor_right = 12; //symbol motor_right = c.1
-int motor_left = 13; //symbol motor_left = c.2
+Servo motor_right; // arduino servo object for right motor //symbol motor_right = c.1
+Servo motor_left; //arduino servo object for left motor //symbol motor_left = c.2
 symbol relay = 1
 symbol left_sensor = b40
 symbol front_sensor = b41
@@ -145,12 +147,16 @@ pause 5000 'time to remove hand from mouse
 //     angle=90:  no movement, and
 //    angle=180:  full speed in the other direction.
 //
-// PICOne code used pwmout of 255 to both motors, which would correspond to full-speed
-// forward.  Therefore, lets use servo.write(180) for one servo and servo.write(0) for
-// the other servo, since left and right servos are facing the opposite direction.
+// PICOne code set both motors to full speed.  Therefore, lets use servo.write(180)
+// for one servo and servo.write(0) for the other servo, since left and right servos
+// are facing the opposite direction.
+//
+// To incorporate speed, use the calibrated relative top speed values (right_motor and 
+// left_motor).  90 + right_motor = calibrated absolute top speed for right motor.
+// 90 - left_motor = calibrated absolute top speed for left motor.
 void steer_straight() { //steer_straight:
-//pwmout motor_right,255,right_motor
-//pwmout motor_left,255,left_motor
+  motor_right.write(90+right_motor); //pwmout motor_right,255,right_motor
+  motor_left.write(90-left_motor); //pwmout motor_left,255,left_motor
 }
 
 forward_loop:
@@ -1005,3 +1011,13 @@ void led_thing_2() { // led_thing_2:
   return; // return
 }
 
+
+void setup{
+  // put arduino setup code here
+  motor_right.attach(motor_right_pin);
+  motor_left.attach(motor_left_pin);
+}
+
+void loop{
+  // put arduino loop code here
+}

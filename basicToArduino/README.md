@@ -8,8 +8,8 @@ Referring to all the sub-routines that need to be converted to Arduino.
 [X] = Complete
 
 [P] All those symbols (init)
-[ ] main
-[P] steer_straight
+[ ] main (probably move this code to loop())
+[X] steer_straight
 [ ] forward_loop
 [ ] end_move
 [ ] steer_right
