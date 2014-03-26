@@ -9,7 +9,7 @@ Referring to all the sub-routines that need to be converted to Arduino.
 
 [P] All those symbols (init)
 [ ] main
-[ ] steer_straight
+[P] steer_straight
 [ ] forward_loop
 [ ] end_move
 [ ] steer_right

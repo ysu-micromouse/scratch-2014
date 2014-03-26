@@ -46,8 +46,8 @@ symbol yellow_led = 0 ;
 symbol green_led = 5
 symbol sensor = b7 'sensor reading from pic28
 symbol sensor_leds = c.5 'IR leds
-symbol motor_right = c.1
-symbol motor_left = c.2
+int motor_right = 12; //symbol motor_right = c.1
+int motor_left = 13; //symbol motor_left = c.2
 symbol relay = 1
 symbol left_sensor = b40
 symbol front_sensor = b41
@@ -137,10 +137,21 @@ switch off left_red_led 'left red led off
 switch off right_red_led 'right red led off
 pause 5000 'time to remove hand from mouse
 
-
-steer_straight:
-pwmout motor_right,255,right_motor
-pwmout motor_left,255,left_motor
+// STEER_STRAIGHT
+// According to arduino _servo_ library
+// http://arduino.cc/en/reference/servo
+// for a continuous servo, servo.write(angle) will set the speed of the servo rotation
+// with angle=0:  full speed in one direction,
+//     angle=90:  no movement, and
+//    angle=180:  full speed in the other direction.
+//
+// PICOne code used pwmout of 255 to both motors, which would correspond to full-speed
+// forward.  Therefore, lets use servo.write(180) for one servo and servo.write(0) for
+// the other servo, since left and right servos are facing the opposite direction.
+void steer_straight() { //steer_straight:
+//pwmout motor_right,255,right_motor
+//pwmout motor_left,255,left_motor
+}
 
 forward_loop:
 
