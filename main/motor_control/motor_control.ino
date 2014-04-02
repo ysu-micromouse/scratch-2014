@@ -39,6 +39,20 @@ int mv_back_duration = 0; // duration for backward movement cmd
 boolean mv_back = false; // moving backward flag
 int mv_back_start = 0; // start time for backward movement cmd
 
+int mv_right_duration = 0; // duration for right turn cmd
+boolean mv_right = false; // turning right flag
+int mv_right_start = 0; // start time for right turn cmd
+
+int mv_left_duration = 0; // duration for left turn cmd
+boolean mv_left = false; // turning left flag
+int mv_left_start = 0; // start time for left turn cmd
+
+int turn_adj_duration = 0; // duration for forward adjustment after turn
+boolean turn_adj = false; // forward adjustment after turn flag
+int turn_adj_start = 0; // start time for forward adjustment after turn
+
+boolean stopped = true;
+
 // state of current mouse regarding forward travel
 boolean straight = true; // mouse traveling straight down center
 boolean rCorr = false; // mouse making rightward correction
@@ -86,6 +100,11 @@ void move_stop(){
   mv_fore_duration = 0;
   mv_back = false;
   mv_back_duration = 0;
+  stopped = true;
+  mv_right = false;
+  mv_right_duration = 0;
+  mv_left = false;
+  mv_left_duration = 0;
 }
 
 void set_rMotor_speed(float rel){
@@ -122,15 +141,12 @@ boolean sensory_wall() {
     return false;
 }
 
-void move_rotates(int Degree, bool Right) {
-  if (Right) { // make right turn
-    set_lMotor_speed(1);
-    set_rMotor_speed(0);
-  }
-  else { // make left turn
-    set_rMotor_speed(1);
-    set_lMotor_speed(0);
-  }
+void turn_right(int Degree) {
+  mv_right_duration = 1500;
+}
+
+void turn_left(int Degree) {
+  mv_left_duration = 1500;
 }
 
 void setup(){
@@ -148,7 +164,8 @@ void setup(){
   
   // just testing
   delay(5000);
-  move_forward(15000); // make 15 second forward movement
+  move_forward(1375); // make 4 second forward movement
+
 }
 
 void loop(){
@@ -157,6 +174,7 @@ void loop(){
     if (!mv_fore){
       // start movement
       mv_fore = true;
+      stopped = false;
       mv_fore_start = millis();
       set_lMotor_speed(1);
       set_rMotor_speed(1);
@@ -166,6 +184,7 @@ void loop(){
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_fore = false;
+      stopped = true;
       mv_fore_duration = 0;
     }
     else {
@@ -202,6 +221,7 @@ void loop(){
     if (!mv_back){
       // start movement
       mv_back = true;
+      stopped = false;
       mv_back_start = millis();
       set_lMotor_speed(-1);
       set_rMotor_speed(-1);
@@ -211,6 +231,7 @@ void loop(){
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_back = false;
+      stopped = true;
       mv_back_duration = 0;
     }
     else {
@@ -242,12 +263,91 @@ void loop(){
     }
   }
   
+  else if (mv_right_duration > 0){
+    // handle right turn movement
+    if (!mv_right){
+      // start movement
+      mv_right = true;
+      stopped = false;
+      mv_right_start = millis();
+      set_lMotor_speed(1);
+      set_rMotor_speed(-0.15);
+    }
+    else if (millis() - mv_right_start >= mv_right_duration){
+      // stop movement
+      set_lMotor_speed(0);
+      set_rMotor_speed(0);
+      mv_right_duration = 0;
+      turn_adj_duration = 200;
+      move_forward(1375);
+    }
+  }
+  
+  else if (mv_left_duration > 0){
+    // handle left turn movement
+    if (!mv_left){
+      // start movement
+      mv_left = true;
+      stopped = false;
+      mv_left_start = millis();
+      set_lMotor_speed(-0.15);
+      set_rMotor_speed(1);
+    }
+    else if (millis() - mv_left_start >= mv_left_duration){
+      // stop movement
+      set_lMotor_speed(0);
+      set_rMotor_speed(0);
+      mv_left_duration = 0;
+      turn_adj_duration = 200;
+      move_forward(1375);
+    }
+  }
+  
+  else if (turn_adj_duration > 0){
+    if (!turn_adj){
+      // start our forward adjustment
+      turn_adj = true;
+      turn_adj_start = millis();
+    }
+    else if (millis() - turn_adj_start >= turn_adj_duration){ // if enough time has passed after turn
+      // stop our forward adjustment
+      // set mv_left and mv_right flags to false
+      // so we can get back to checking for possible turns
+      mv_left = false;
+      mv_right = false;
+    }
+  }
+  
   read_sensors(); // update wall sensor readings
   
+  if (!mv_right && !mv_left) {
+    if (rDist > 9) {
+      // can make right turn
+      move_stop();
+      turn_right(90);
+    }
+    else if (lDist > 9) {
+      // go left
+      move_stop();
+      turn_left(90);
+    }
+  }
+  else if (stopped && fDist > 9) {
+    // go straight
+    move_forward(1375);
+  }
+  else if (stopped && sensory_wall()) {
+    // dead end
+    move_backward(1375);
+  }
+  else {
+    // ??????????
+  }
+  
+  
   // just testing
-  if (!mv_back && sensory_wall()) {
+  if (!stopped && sensory_wall()) {
     move_stop();
-    move_backward(5000);
   }
   
   delay(10);
