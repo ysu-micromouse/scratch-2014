@@ -6,7 +6,15 @@
 struct WallMemory {
   boolean N, S, E, W;
 }
+
 WallMemory defaultWallMemory = { false, false, false, false };
+
+enum CardinalDirection {
+  NORTH,
+  SOUTH,
+  EAST,
+  WEST
+};
 
 class Maze {
 public:
