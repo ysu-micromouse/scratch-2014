@@ -11,6 +11,11 @@
 // Todo (functionality):
 //   [X] straightness correction during forward movement
 //
+// Todo (fixes):
+//   [P] immediate right turn after left undershoots
+//   [P] immediate left turn after right undershoots
+//   [ ] OK to move forward doesn't work
+//   [ ] doesn't move backward on dead end
 
 #include <Servo.h>
 
@@ -33,6 +38,11 @@ const int rtop = -74; // right servo adj. for top speed foreward
 const int ltopR = -55; // left servo adj. for top speed reverse
 const int rtopR = 74; // right servo adj. for top speed reverse
 
+// movement timing constants
+const int r90_duration = 1400; // msec for 90-deg right turn
+const int l90_duration = 1400; // msec for 90-deg left turn
+const int f1_duration = 1375; // msec for one cell forward move
+const int b1_duration = 1375; // msec for one cell backward move
 
 //// VARIABLES
 int mv_fore_duration = 0; // duration for forward movement cmd
@@ -146,11 +156,11 @@ boolean sensory_wall() {
 }
 
 void turn_right(int Degree) {
-  mv_right_duration = 1500;
+  mv_right_duration = r90_duration;
 }
 
 void turn_left(int Degree) {
-  mv_left_duration = 1500;
+  mv_left_duration = l90_duration;
 }
 
 void setup(){
@@ -168,7 +178,7 @@ void setup(){
   
   // just testing
   delay(4000);
-//  move_forward(1375); // make 4 second forward movement
+  move_forward(f1_duration); // make 4 second forward movement
 
 }
 
@@ -282,8 +292,10 @@ void loop(){
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_right_duration = 0;
-      turn_adj_duration = 200;
-      move_forward(1375);
+      turn_adj_duration = 700;
+      move_forward(f1_duration);
+      // don't set stopped flag here, since we're doing
+      // an immediate forward movement.
     }
   }
   
@@ -302,8 +314,10 @@ void loop(){
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_left_duration = 0;
-      turn_adj_duration = 200;
-      move_forward(1375);
+      turn_adj_duration = 700;
+      move_forward(f1_duration);
+      // don't set stopped flag here, since we're doing
+      // an immediate forward movement.
     }
   }
   
@@ -321,34 +335,35 @@ void loop(){
       // so we can get back to checking for possible turns
       mv_left = false;
       mv_right = false;
+      turn_adj = false;      // testing these lines to see if
+      turn_adj_duration = 0; // mouse doesn't freak out anymore
     }
   }
   
   read_sensors(); // update wall sensor readings
   
-  if (!one_turn && mv_right && !mv_left) {
+  if (!mv_right && !mv_left) {
     if (rDist > 9) {
       // can make right turn
       move_stop();
       turn_right(90);
-      one_turn = true;
+      //one_turn = true;
     }
     else if (lDist > 9) {
       // go left
       move_stop();
       turn_left(90);
-      one_turn = true;
+      //one_turn = true;
     }
   }
-  else if (!one_fore && stopped && fDist > 9) {
+  else if (stopped && fDist > 9) {
     // go straight
-    move_forward(1375);
-    one_fore = true;
+    move_forward(f1_duration);
+    //one_fore = true;
   }
   else if (stopped && sensory_wall()) {
     // dead end
-    move_stop();
-    move_backward(1375);
+    move_backward(b1_duration);
   }
   else {
     // ??????????
