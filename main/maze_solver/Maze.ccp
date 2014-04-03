@@ -42,7 +42,7 @@ Maze::Maze() {
   
   int x_pos = 0;
   int y_pos = 0;
-  int direc = 0;
+  CardinalDirection direc = EAST;
 
 }
 
@@ -72,9 +72,28 @@ Maze::minNeighbor(int x, int y) {
 }
 
 Maze::minDirec(int x, int y) {
-  int[] pos = { x, y };
-  //
-  return pos;
+  int min_pos = {x, y};
+  if(!boardWalls[x][y].N) {
+    if(board[x][y-1] < min) {
+      min_pos = {x, y-1};
+    }
+  }
+  if(!boardWalls[x][y].S) {
+    if(board[x][y+1] < min) {
+      min_pos = {x, y+1};
+    }
+  }
+  if(!boardWalls[x][y].W) {
+    if(board[x-1][y] < min) {
+      min_pos = {x-1, y};
+    }
+  }
+  if(!boardWalls[x][y].E) {
+    if(board[x+1][y] < min) {
+      min_pos = {x+1, y};
+    }
+  }
+  return min_pos;
 }
 
 Maze::checkFinish(int x, int y) {
@@ -86,4 +105,131 @@ Maze::checkFinish(int x, int y) {
 
 Maze::checkConsistency(int x, int y) {
   return board[x][y] != minNeighbor(x, y) + 1;
+}
+
+Maze::fixMaze() {
+  int temp = 0;
+  while (board[x_pos][y_pos] != temp) {
+    temp = board[x_pos][y_pos];
+    for(int i = 0; i < 16; i++) {
+      for(int j = 0; j < 16; j++) {
+        if(!checkFinish(i, j)) {
+          if(!checkConsistency(i, j)) {
+            board[i][j] = minNeighbor(i, j) + 1;
+          }
+        }
+      }
+    }
+  }
+}
+
+Maze::decideMovement() {
+  int[] directionNeedToGo = minDirec(x, y);
+  CardinalDirection currentWalls = boardWalls[x_pos][y_pos];
+  switch (direc) {
+    case EAST:
+      if(!currentWalls.E) {
+        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveForward();
+          return;
+        }
+      }
+      if(!currentWalls.W) {
+        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveReverse();
+          return;
+        }
+      }
+      if(!currentWalls.S) {
+        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+          MotorControl::moveRight();
+          return;
+        }
+      }
+      if(!currentWalls.N) {
+        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+          MotorControl::moveLeft();
+          return;
+        }
+      }
+      break;
+    case SOUTH:
+      if(!currentWalls.E) {
+        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveLeft();
+          return;
+        }
+      }
+      if(!currentWalls.W) {
+        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveRight();
+          return;
+        }
+      }
+      if(!currentWalls.S) {
+        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+          MotorControl::moveForward();
+          return;
+        }
+      }
+      if(!currentWalls.N) {
+        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+          MotorControl::moveReverse();
+          return;
+        }
+      }
+      break;
+    case NORTH:
+      if(!currentWalls.E) {
+        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveRight();
+          return;
+        }
+      }
+      if(!currentWalls.W) {
+        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveLeft();
+          return;
+        }
+      }
+      if(!currentWalls.S) {
+        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+          MotorControl::moveReverse();
+          return;
+        }
+      }
+      if(!currentWalls.N) {
+        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+          MotorControl::moveForward();
+          return;
+        }
+      }
+      break;
+    case WEST:
+      if(!currentWalls.E) {
+        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveReverse();
+          return;
+        }
+      }
+      if(!currentWalls.W) {
+        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+          MotorControl::moveForward();
+          return;
+        }
+      }
+      if(!currentWalls.S) {
+        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+          MotorControl::moveLeft();
+          return;
+        }
+      }
+      if(!currentWalls.N) {
+        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+          MotorControl::moveRight();
+          return;
+        }
+      }
+      break;
+  }
 }
