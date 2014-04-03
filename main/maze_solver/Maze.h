@@ -2,12 +2,16 @@
 #define MAZE_H
 
 #include <Arduino.h>
+#include <vector>
 
-struct WallMemory {
+
+class Maze {
+public:
+  struct WallMemory {
   bool N, S, E, W;
 };
 
-WallMemory defaultWallMemory = { false, false, false, false };
+
 
 enum CardinalDirection {
   NORTH,
@@ -15,11 +19,6 @@ enum CardinalDirection {
   EAST,
   WEST
 };
-
-
-
-class Maze {
-public:
   Maze();
   ~Maze();
   int board[16][16];

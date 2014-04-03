@@ -1,9 +1,10 @@
+#include "Arduino.h"
 #include "Maze.h"
 
 // Maze constructor
 Maze::Maze() {
 
-  board = {
+  int temp_board[16][16] = {
             { 14, 13, 12, 11, 10,  9,  8,  7,  7,  8,  9, 10, 11, 12, 13, 14 },
             { 13, 12, 11, 10,  9,  8,  7,  6,  6,  7,  8,  9, 10, 11, 12, 13 },
             { 12, 11, 10,  9,  8,  7,  6,  5,  5,  6,  7,  8,  9, 10, 11, 12 },
@@ -21,18 +22,12 @@ Maze::Maze() {
             { 13, 12, 11, 10,  9,  8,  7,  6,  6,  7,  8,  9, 10, 11, 12, 13 },
             { 14, 13, 12, 11, 10,  9,  8,  7,  7,  8,  9, 10, 11, 12, 13, 14 }
           };
-  /*int max=14;
-  int min=-7;
   for(int i=0; i<16; i++) {
     for(int j=0; j<16; j++) {
-      if(j>7) {
-        board[i][j] = min+;
-      } else {
-        board[i][j] = min-i;
-      }
-    }
-  }*/
-          
+      board[i][j] = temp_board[i][j];
+    } 
+  }
+  WallMemory defaultWallMemory = { false, false, false, false }; 
   for(int i=0; i<16; i++) {
     for(int j=0; j<16; j++) {
       boardWalls[i][j] = defaultWallMemory;
@@ -88,25 +83,29 @@ int* Maze::minDirec(int x, int y) {
   if(!boardWalls[x][y].N) {
     if(board[x][y-1] < min) {
       min = board[x][y-1];
-      min_pos = {x, y-1};
+      min_pos[0] = x;
+      min_pos[1] = y-1;
     }
   }
   if(!boardWalls[x][y].S) {
     if(board[x][y+1] < min) {
       min = board[x][y+1];
-      min_pos = {x, y+1};
+      min_pos[0] = x;
+      min_pos[1] = y+1;
     }
   }
   if(!boardWalls[x][y].W) {
     if(board[x-1][y] < min) {
       min = board[x-1][y];
-      min_pos = {x-1, y};
+      min_pos[0] = x-1;
+      min_pos[1] = y;
     }
   }
   if(!boardWalls[x][y].E) {
     if(board[x+1][y] < min) {
       min = board[x+1][y];
-      min_pos = {x+1, y};
+      min_pos[0] = x+1;
+      min_pos[1] = y;
     }
   }
   return min_pos;
@@ -140,30 +139,32 @@ void Maze::fixMaze() {
 }
 
 void Maze::decideMovement() {
-  int[2] directionNeedToGo = minDirec(x, y);
+  int directionNeedToGo[2];// = minDirec(x_pos, y_pos);
+  directionNeedToGo[0] = minDirec(x_pos, y_pos)[0];
+  directionNeedToGo[1] = minDirec(x_pos, y_pos)[1];
   WallMemory currentWalls = boardWalls[x_pos][y_pos];
   switch (direc) {
     case EAST:
       if(!currentWalls.E) {
-        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos+1 && directionNeedToGo[1] == y_pos) { //{x_pos+1, y_pos} == directionNeedToGo ) {
           MotorControl::moveForward();
           return;
         }
       }
       if(!currentWalls.W) {
-        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos-1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveReverse();
           return;
         }
       }
       if(!currentWalls.S) {
-        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos+1 ) {
           MotorControl::moveRight();
           return;
         }
       }
       if(!currentWalls.N) {
-        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos-1 ) {
           MotorControl::moveLeft();
           return;
         }
@@ -171,25 +172,25 @@ void Maze::decideMovement() {
       break;
     case SOUTH:
       if(!currentWalls.E) {
-        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos+1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveLeft();
           return;
         }
       }
       if(!currentWalls.W) {
-        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos-1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveRight();
           return;
         }
       }
       if(!currentWalls.S) {
-        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos+1 ) {
           MotorControl::moveForward();
           return;
         }
       }
       if(!currentWalls.N) {
-        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos-1 ) {
           MotorControl::moveReverse();
           return;
         }
@@ -197,25 +198,25 @@ void Maze::decideMovement() {
       break;
     case NORTH:
       if(!currentWalls.E) {
-        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos+1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveRight();
           return;
         }
       }
       if(!currentWalls.W) {
-        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos-1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveLeft();
           return;
         }
       }
       if(!currentWalls.S) {
-        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos+1 ) {
           MotorControl::moveReverse();
           return;
         }
       }
       if(!currentWalls.N) {
-        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos-1 ) {
           MotorControl::moveForward();
           return;
         }
@@ -223,25 +224,25 @@ void Maze::decideMovement() {
       break;
     case WEST:
       if(!currentWalls.E) {
-        if( {x_pos+1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos+1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveReverse();
           return;
         }
       }
       if(!currentWalls.W) {
-        if( {x_pos-1, y_pos} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos-1 && directionNeedToGo[1] == y_pos ) {
           MotorControl::moveForward();
           return;
         }
       }
       if(!currentWalls.S) {
-        if( {x_pos, y_pos+1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos+1 ) {
           MotorControl::moveLeft();
           return;
         }
       }
       if(!currentWalls.N) {
-        if( {x_pos, y_pos-1} == directionNeedToGo ) {
+        if( directionNeedToGo[0] == x_pos && directionNeedToGo[1] == y_pos-1 ) {
           MotorControl::moveRight();
           return;
         }
