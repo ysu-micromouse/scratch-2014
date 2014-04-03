@@ -39,8 +39,11 @@ const int ltopR = -55; // left servo adj. for top speed reverse
 const int rtopR = 74; // right servo adj. for top speed reverse
 
 // movement timing constants
-const int r90_duration = 1400; // msec for 90-deg right turn
-const int l90_duration = 1300; // msec for 90-deg left turn
+const int r90_duration = 1300; // msec for 90-deg right turn
+const int l90_duration = 1200; // msec for 90-deg left turn
+const int lr90_adj_duration = 900; // msec for turn override after a forward turn
+const int br90_duration = 1400; // msec for 90-deg backward right turn
+const int bl90_duration = 1300; // msec for 90-deg backward left turn
 const int f1_duration = 1375; // msec for one cell forward move
 const int b1_duration = 1375; // msec for one cell backward move
 
@@ -61,11 +64,20 @@ int mv_left_duration = 0; // duration for left turn cmd
 boolean mv_left = false; // turning left flag
 int mv_left_start = 0; // start time for left turn cmd
 
+int mv_bRight_duration = 0; // duration for backward right turn cmd
+boolean mv_bRight = false; // backward right turn cmd
+int mv_bRight_start = 0; // start time for backward right turn cmd
+
+int mv_bLeft_duration = 0; // duration for backward left turn cmd
+boolean mv_bLeft = false; // backward left turn flag
+int mv_bLeft_start = 0; // start time for backward left turn cmd
+
 int turn_adj_duration = 0; // duration for forward adjustment after turn
 boolean turn_adj = false; // forward adjustment after turn flag
 int turn_adj_start = 0; // start time for forward adjustment after turn
 
 boolean stopped = true;
+boolean forward = true;
 
 // state of current mouse regarding forward travel
 boolean straight = true; // mouse traveling straight down center
@@ -163,6 +175,14 @@ void turn_left(int Degree) {
   mv_left_duration = l90_duration;
 }
 
+void turn_bRight(int Degree) {
+  mv_bRight_duration = br90_duration;
+}
+
+void turn_bLeft(int Degree) {
+  mv_bLeft_duration = bl90_duration;
+}
+
 void setup(){
 //  Serial.begin(9600); // uncomment for debugging
   
@@ -178,7 +198,7 @@ void setup(){
   
   // just testing
   delay(4000);
-  move_forward(f1_duration); // make 4 second forward movement
+ // move_forward(f1_duration); // make 4 second forward movement
 
 }
 
@@ -187,6 +207,7 @@ void loop(){
     // handle foreward movement
     if (!mv_fore){
       // start movement
+      forward = true;
       mv_fore = true;
       stopped = false;
       mv_fore_start = millis();
@@ -234,6 +255,7 @@ void loop(){
     // handle backward movement
     if (!mv_back){
       // start movement
+      forward = false;
       mv_back = true;
       stopped = false;
       mv_back_start = millis();
@@ -292,7 +314,7 @@ void loop(){
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_right_duration = 0;
-      turn_adj_duration = 700;
+      turn_adj_duration = lr90_adj_duration;
       move_forward(f1_duration);
       // don't set stopped flag here, since we're doing
       // an immediate forward movement.
@@ -314,10 +336,54 @@ void loop(){
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_left_duration = 0;
-      turn_adj_duration = 700;
+      turn_adj_duration = lr90_adj_duration;
       move_forward(f1_duration);
       // don't set stopped flag here, since we're doing
       // an immediate forward movement.
+    }
+  }
+  
+  else if (mv_bRight_duration > 0){
+    // handle back right turn movement
+    if (!mv_bRight){
+      // start movement
+      mv_bRight = true;
+      stopped = false;
+      mv_bRight_start = millis();
+      set_lMotor_speed(-1);
+      set_rMotor_speed(0.15);
+    }
+    else if (millis() - mv_bRight_start >= mv_bRight_duration){
+      // stop movement
+      set_lMotor_speed(0);
+      set_rMotor_speed(0);
+      mv_bRight_duration = 0;
+      turn_adj_duration = lr90_adj_duration;
+      move_backward(b1_duration);
+      // don't set stopped flag here, since we're doing
+      // an immediate backward movement.
+    }
+  }
+  
+  else if (mv_bLeft_duration > 0){
+    // handle back left turn movement
+    if (!mv_bLeft){
+      // start movement
+      mv_bLeft = true;
+      stopped = false;
+      mv_bLeft_start = millis();
+      set_lMotor_speed(0.15);
+      set_rMotor_speed(-1);
+    }
+    else if (millis() - mv_bLeft_start >= mv_bLeft_duration){
+      // stop movement
+      set_lMotor_speed(0);
+      set_rMotor_speed(0);
+      mv_bLeft_duration = 0;
+      turn_adj_duration = lr90_adj_duration;
+      move_backward(b1_duration);
+      // don't set stopped flag here, since we're doing
+      // an immediate backward movement.
     }
   }
   
@@ -342,23 +408,25 @@ void loop(){
   
   read_sensors(); // update wall sensor readings
   
-  if (!mv_right && !mv_left) {
+  if (!mv_right && !mv_left && !mv_bRight && !mv_bLeft) {
     if (rDist > 9) {
-      // can make right turn
       move_stop();
-      turn_right(90);
-      //one_turn = true;
+      if (forward)
+        turn_right(90);
+      else
+        turn_bRight(90);
     }
     else if (lDist > 9) {
       // go left
       move_stop();
-      turn_left(90);
-      //one_turn = true;
+      if (forward)
+        turn_left(90);
+      else
+        turn_bLeft(90);
     }
     else if (stopped && fDist > 8) {
       // go straight
       move_forward(f1_duration);
-      //one_fore = true;
     }
     else if (stopped && sensory_wall()) {
       // dead end
