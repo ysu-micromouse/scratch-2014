@@ -40,7 +40,7 @@ const int rtopR = 74; // right servo adj. for top speed reverse
 
 // movement timing constants
 const int r90_duration = 1400; // msec for 90-deg right turn
-const int l90_duration = 1400; // msec for 90-deg left turn
+const int l90_duration = 1300; // msec for 90-deg left turn
 const int f1_duration = 1375; // msec for one cell forward move
 const int b1_duration = 1375; // msec for one cell backward move
 
@@ -149,7 +149,7 @@ void read_sensors(){
 
 boolean sensory_wall() {
   // return true if front wall is found.
-  if (fDist < 5)
+  if (fDist < 2)
     return true;
   else
     return false;
@@ -206,14 +206,14 @@ void loop(){
       if (!rCorr && lDist < 3){
         // Too close to left wall.  Make rightward correction.
         set_lMotor_speed(1);
-        set_rMotor_speed(0.7);
+        set_rMotor_speed(0.6);
         rCorr = true;
         lCorr = false;
         straight = false;
       }
       else if (!lCorr && rDist < 3){
         // Too close to right wall.  Make leftward correction.
-        set_lMotor_speed(0.8);
+        set_lMotor_speed(0.6);
         set_rMotor_speed(1);
         lCorr = true;
         rCorr = false;
@@ -355,18 +355,18 @@ void loop(){
       turn_left(90);
       //one_turn = true;
     }
-  }
-  else if (stopped && fDist > 9) {
-    // go straight
-    move_forward(f1_duration);
-    //one_fore = true;
-  }
-  else if (stopped && sensory_wall()) {
-    // dead end
-    move_backward(b1_duration);
-  }
-  else {
-    // ??????????
+    else if (stopped && fDist > 8) {
+      // go straight
+      move_forward(f1_duration);
+      //one_fore = true;
+    }
+    else if (stopped && sensory_wall()) {
+      // dead end
+      move_backward(b1_duration);
+    }
+    else {
+      // ??????????
+    }
   }
   
   delay(10);
