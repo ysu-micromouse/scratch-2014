@@ -40,12 +40,14 @@ const int rtopR = 74; // right servo adj. for top speed reverse
 
 // movement timing constants
 const int r90_duration = 1300; // msec for 90-deg right turn
-const int l90_duration = 1200; // msec for 90-deg left turn
-const int lr90_adj_duration = 900; // msec for turn override after a forward turn
-const int br90_duration = 1400; // msec for 90-deg backward right turn
-const int bl90_duration = 1300; // msec for 90-deg backward left turn
+const int l90_duration = 1250; // msec for 90-deg left turn
+const int lr90_adj_duration = 800; // msec for turn override after a forward turn
+const int br90_duration = 1450; // msec for 90-deg backward right turn
+const int bl90_duration = 1310; // msec for 90-deg backward left turn
+const int mv_bTurn_back_duration = 400; // msec for extra backward movement before backward turn
 const int f1_duration = 1375; // msec for one cell forward move
 const int b1_duration = 1375; // msec for one cell backward move
+const int blr90_adj_duration = 1375; // msec for turn override after a backward turn
 
 //// VARIABLES
 int mv_fore_duration = 0; // duration for forward movement cmd
@@ -197,9 +199,7 @@ void setup(){
   set_rMotor_speed(0);
   
   // just testing
-  delay(4000);
- // move_forward(f1_duration); // make 4 second forward movement
-
+  delay(4000); // wait 4 seconds to manually align the mouse
 }
 
 void loop(){
@@ -222,19 +222,19 @@ void loop(){
       stopped = true;
       mv_fore_duration = 0;
     }
-    else {
+    else if (!turn_adj) {
       // continue movement
       if (!rCorr && lDist < 3){
         // Too close to left wall.  Make rightward correction.
         set_lMotor_speed(1);
-        set_rMotor_speed(0.6);
+        set_rMotor_speed(0.7);
         rCorr = true;
         lCorr = false;
         straight = false;
       }
       else if (!lCorr && rDist < 3){
         // Too close to right wall.  Make leftward correction.
-        set_lMotor_speed(0.6);
+        set_lMotor_speed(0.7);
         set_rMotor_speed(1);
         lCorr = true;
         rCorr = false;
@@ -270,19 +270,19 @@ void loop(){
       stopped = true;
       mv_back_duration = 0;
     }
-    else {
+    else if (!turn_adj) {
       // continue movement
       if (!rCorr && lDist < 4.0){
         // Too close to left wall.  Make rightward correction.
         set_lMotor_speed(-1);
-        set_rMotor_speed(-0.8);
+        set_rMotor_speed(-0.7);
         rCorr = true;
         lCorr = false;
         straight = false;
       }
       else if (!lCorr && rDist < 4.0){
         // Too close to right wall.  Make leftward correction.
-        set_lMotor_speed(-0.8);
+        set_lMotor_speed(-0.7);
         set_rMotor_speed(-1);
         lCorr = true;
         rCorr = false;
@@ -347,21 +347,30 @@ void loop(){
     // handle back right turn movement
     if (!mv_bRight){
       // start movement
+      // At first we'll do a little extra backward movement,
+      // otherwise we'll turn too soon.
       mv_bRight = true;
       stopped = false;
       mv_bRight_start = millis();
       set_lMotor_speed(-1);
-      set_rMotor_speed(0.15);
+      set_rMotor_speed(-1);
     }
-    else if (millis() - mv_bRight_start >= mv_bRight_duration){
+    else if (millis() - mv_bRight_start >= mv_bRight_duration + mv_bTurn_back_duration){
       // stop movement
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_bRight_duration = 0;
-      turn_adj_duration = lr90_adj_duration;
-      move_backward(b1_duration);
+      turn_adj_duration = blr90_adj_duration;
+      move_forward(f1_duration);
+      forward = true;
       // don't set stopped flag here, since we're doing
       // an immediate backward movement.
+    }
+    else if (millis() - mv_bRight_start >= mv_bTurn_back_duration){
+      // completed extra backward movement
+      // initiate the turn
+      set_lMotor_speed(-1);
+      set_rMotor_speed(0.15);
     }
   }
   
@@ -369,21 +378,30 @@ void loop(){
     // handle back left turn movement
     if (!mv_bLeft){
       // start movement
+      // At first we'll do a little extra backward movement,
+      // otherwise we'll turn too soon.
       mv_bLeft = true;
       stopped = false;
       mv_bLeft_start = millis();
-      set_lMotor_speed(0.15);
+      set_lMotor_speed(-1);
       set_rMotor_speed(-1);
     }
-    else if (millis() - mv_bLeft_start >= mv_bLeft_duration){
+    else if (millis() - mv_bLeft_start >= mv_bLeft_duration + mv_bTurn_back_duration){
       // stop movement
       set_lMotor_speed(0);
       set_rMotor_speed(0);
       mv_bLeft_duration = 0;
-      turn_adj_duration = lr90_adj_duration;
-      move_backward(b1_duration);
+      turn_adj_duration = blr90_adj_duration;
+      move_forward(f1_duration);
+      forward = true;
       // don't set stopped flag here, since we're doing
       // an immediate backward movement.
+    }
+    else if (millis() - mv_bLeft_start >= mv_bTurn_back_duration){
+      // completed extra backward movement
+      // initiate the turn
+      set_lMotor_speed(0.15);
+      set_rMotor_speed(-1);
     }
   }
   
@@ -401,13 +419,16 @@ void loop(){
       // so we can get back to checking for possible turns
       mv_left = false;
       mv_right = false;
+      mv_bRight = false;
+      mv_bLeft = false;
       turn_adj = false;      // testing these lines to see if
       turn_adj_duration = 0; // mouse doesn't freak out anymore
     }
   }
   
   read_sensors(); // update wall sensor readings
-  
+
+  // SIMPLE CONTROL ALGORITHM
   if (!mv_right && !mv_left && !mv_bRight && !mv_bLeft) {
     if (rDist > 9) {
       move_stop();
