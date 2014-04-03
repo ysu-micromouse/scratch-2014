@@ -21,6 +21,17 @@ Maze::Maze() {
             { 13, 12, 11, 10,  9,  8,  7,  6,  6,  7,  8,  9, 10, 11, 12, 13 },
             { 14, 13, 12, 11, 10,  9,  8,  7,  7,  8,  9, 10, 11, 12, 13, 14 }
           };
+  /*int max=14;
+  int min=-7;
+  for(int i=0; i<16; i++) {
+    for(int j=0; j<16; j++) {
+      if(j>7) {
+        board[i][j] = min+;
+      } else {
+        board[i][j] = min-i;
+      }
+    }
+  }*/
           
   for(int i=0; i<16; i++) {
     for(int j=0; j<16; j++) {
@@ -46,7 +57,7 @@ Maze::Maze() {
 
 }
 
-Maze::minNeighbor(int x, int y) {
+int Maze::minNeighbor(int x, int y) {
   int min = board[x][y];
   if(!boardWalls[x][y].N) {
     if(board[x][y-1] < min) {
@@ -71,43 +82,48 @@ Maze::minNeighbor(int x, int y) {
   return min;
 }
 
-Maze::minDirec(int x, int y) {
-  int min_pos = {x, y};
+int* Maze::minDirec(int x, int y) {
+  int min = board[x][y];
+  int min_pos[2] = {x, y};
   if(!boardWalls[x][y].N) {
     if(board[x][y-1] < min) {
+      min = board[x][y-1];
       min_pos = {x, y-1};
     }
   }
   if(!boardWalls[x][y].S) {
     if(board[x][y+1] < min) {
+      min = board[x][y+1];
       min_pos = {x, y+1};
     }
   }
   if(!boardWalls[x][y].W) {
     if(board[x-1][y] < min) {
+      min = board[x-1][y];
       min_pos = {x-1, y};
     }
   }
   if(!boardWalls[x][y].E) {
     if(board[x+1][y] < min) {
+      min = board[x+1][y];
       min_pos = {x+1, y};
     }
   }
   return min_pos;
 }
 
-Maze::checkFinish(int x, int y) {
+bool Maze::checkFinish(int x, int y) {
   return  (x==7 && y==7) ||
           (x==8 && y==7) ||
           (x==7 && x==8) ||
           (x==8 && y==8);
 }
 
-Maze::checkConsistency(int x, int y) {
+bool Maze::checkConsistency(int x, int y) {
   return board[x][y] != minNeighbor(x, y) + 1;
 }
 
-Maze::fixMaze() {
+void Maze::fixMaze() {
   int temp = 0;
   while (board[x_pos][y_pos] != temp) {
     temp = board[x_pos][y_pos];
@@ -123,9 +139,9 @@ Maze::fixMaze() {
   }
 }
 
-Maze::decideMovement() {
-  int[] directionNeedToGo = minDirec(x, y);
-  CardinalDirection currentWalls = boardWalls[x_pos][y_pos];
+void Maze::decideMovement() {
+  int[2] directionNeedToGo = minDirec(x, y);
+  WallMemory currentWalls = boardWalls[x_pos][y_pos];
   switch (direc) {
     case EAST:
       if(!currentWalls.E) {

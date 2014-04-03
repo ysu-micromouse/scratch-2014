@@ -4,8 +4,8 @@
 #include <Arduino.h>
 
 struct WallMemory {
-  boolean N, S, E, W;
-}
+  bool N, S, E, W;
+};
 
 WallMemory defaultWallMemory = { false, false, false, false };
 
@@ -16,6 +16,8 @@ enum CardinalDirection {
   WEST
 };
 
+
+
 class Maze {
 public:
   Maze();
@@ -24,8 +26,8 @@ public:
   WallMemory boardWalls[16][16];
   int x_pos, y_pos, direc;
   
-  int minNeightbor(int x, int y);
-  int[] minDirec(int x, int y);
+  int minNeighbor(int x, int y);
+  int* minDirec(int x, int y);
   
   bool checkFinish(int x, int y);
   bool checkConsistency(int x, int y);
