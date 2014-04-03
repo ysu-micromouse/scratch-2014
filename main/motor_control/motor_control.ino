@@ -4,7 +4,7 @@
 // Todo (functions):
 //   [X] move_forward(int Time)
 //   [X] move_reverse(int Time)
-//   [ ] move_rotates(int Degree, bool Right)
+//   [P] move_rotates(int Degree, bool Right)
 //   [ ] move_turn(int Direction)
 //   [X] sensory_wall()
 //
@@ -13,6 +13,10 @@
 //
 
 #include <Servo.h>
+
+//// DEBUG FLAGS
+boolean one_turn = false;
+boolean one_fore = false;
 
 
 //// CONSTANTS
@@ -163,8 +167,8 @@ void setup(){
   set_rMotor_speed(0);
   
   // just testing
-  delay(5000);
-  move_forward(1375); // make 4 second forward movement
+  delay(4000);
+//  move_forward(1375); // make 4 second forward movement
 
 }
 
@@ -303,7 +307,9 @@ void loop(){
     }
   }
   
-  else if (turn_adj_duration > 0){
+  if (turn_adj_duration > 0){
+    // Need to disable left/right turn override for a brief
+    // period after a left or right turn into a new cell.
     if (!turn_adj){
       // start our forward adjustment
       turn_adj = true;
@@ -320,34 +326,32 @@ void loop(){
   
   read_sensors(); // update wall sensor readings
   
-  if (!mv_right && !mv_left) {
+  if (!one_turn && mv_right && !mv_left) {
     if (rDist > 9) {
       // can make right turn
       move_stop();
       turn_right(90);
+      one_turn = true;
     }
     else if (lDist > 9) {
       // go left
       move_stop();
       turn_left(90);
+      one_turn = true;
     }
   }
-  else if (stopped && fDist > 9) {
+  else if (!one_fore && stopped && fDist > 9) {
     // go straight
     move_forward(1375);
+    one_fore = true;
   }
   else if (stopped && sensory_wall()) {
     // dead end
+    move_stop();
     move_backward(1375);
   }
   else {
     // ??????????
-  }
-  
-  
-  // just testing
-  if (!stopped && sensory_wall()) {
-    move_stop();
   }
   
   delay(10);
