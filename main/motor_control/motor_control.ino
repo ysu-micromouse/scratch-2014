@@ -445,6 +445,9 @@ void loop(){
       else
         turn_bLeft(90);
     }
+    else if (!forward) {
+      move_backward(b1_duration);
+    }
     else if (stopped && fDist > 8) {
       // go straight
       move_forward(f1_duration);
