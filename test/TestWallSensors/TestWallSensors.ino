@@ -5,13 +5,15 @@
 
 // These constants won't change.  They're used to give names
 // to the pins used:
-const int fSensPin = A0;  // Analog input pin that the potentiometer is attached to
-const int rSensPin = A1;
-const int lSensPin = A2;
+const int fSensPin = A3;  // Analog input pin that the potentiometer is attached to
+const int rSensPin = A2;
+const int lSensPin = A1;
+const int bSensPin = A0;
 
 float fDist = 0; // front distance (cm)
 float rDist = 0; // left distance (cm)
 float lDist = 0; // right distance (cm)
+float bDist = 0; // back distance (cm)
 
 void setup() {
   // initialize serial communications at 9600 bps:
@@ -24,6 +26,7 @@ void loop() {
   lDist = 10.174*exp(-0.006*analogRead(lSensPin));
   fDist = 10.174*exp(-0.006*analogRead(fSensPin));
   rDist = 10.174*exp(-0.006*analogRead(rSensPin));
+  bDist = 10.174*exp(-0.006*analogRead(bSensPin));
   // map it to the range of the analog out:
 
   // print the results to the serial monitor:
@@ -32,6 +35,8 @@ void loop() {
   Serial.print(fDist);  
   Serial.print(" ");
   Serial.print(rDist);
+  Serial.print(" ");
+  Serial.print(bDist);
   Serial.println(" cm");  
 
   // wait 2 milliseconds before the next loop
