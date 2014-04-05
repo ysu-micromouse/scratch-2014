@@ -1,5 +1,5 @@
 // Motor Control Code
-// 2014-04-01
+// 2014-04-05
 //
 // Todo (functions):
 //   [X] move_forward(int Time)
@@ -16,6 +16,7 @@
 //   [P] immediate left turn after right undershoots
 //   [ ] OK to move forward doesn't work
 //   [ ] doesn't move backward on dead end
+//   [ ] add NO FORWARD AFTER DOUBLE TURN code
 
 #include <Servo.h>
 
@@ -34,21 +35,25 @@ const int rMotorPin = 13; // right motor pin
 const int lMotorPin = 12; // left motor pin
 
 const int mZero = 1500; // servo usec corresponding to zero speed
-const int ltop = 65; // left servo adj. for top speed foreward
-const int rtop = -74; // right servo adj. for top speed foreward
-const int ltopR = -55; // left servo adj. for top speed reverse
-const int rtopR = 74; // right servo adj. for top speed reverse
+const int ltop = 75; // left servo adj. for top speed foreward
+const int rtop = -61; // right servo adj. for top speed foreward
+const int ltopR = -72; // left servo adj. for top speed reverse
+const int rtopR = 65; // right servo adj. for top speed reverse
 
 // movement timing constants
-const int r90_duration = 1375; // msec for 90-deg right turn
-const int l90_duration = 1250; // msec for 90-deg left turn
+const int r90_duration = 1220; // msec for 90-deg right turn
+const int l90_duration = 1400; // msec for 90-deg left turn
+const int f_before_l90_duration = 400;
+const int f_before_r90_duration = 400;
 const int lr90_adj_duration = 800; // msec for turn override after a forward turn
-const int br90_duration = 1450; // msec for 90-deg backward right turn
-const int bl90_duration = 1310; // msec for 90-deg backward left turn
+const int br90_duration = 1250; // msec for 90-deg backward right turn
+const int bl90_duration = 1250; // msec for 90-deg backward left turn
 const int mv_bTurn_back_duration = 400; // msec for extra backward movement before backward turn
 const int f1_duration = 1375; // msec for one cell forward move
 const int b1_duration = 1375; // msec for one cell backward move
 const int blr90_adj_duration = 1375; // msec for turn override after a backward turn
+
+const int debugPin = 6;
 
 //// VARIABLES
 int mv_fore_duration = 0; // duration for forward movement cmd
@@ -201,6 +206,9 @@ void setup(){
   // measurements from the wall sensors.
   analogReference(INTERNAL);
   
+  pinMode(debugPin, OUTPUT);
+  digitalWrite(debugPin, LOW);
+  
   // initialize motors
   rMotor.attach(rMotorPin);
   lMotor.attach(lMotorPin);
@@ -209,7 +217,6 @@ void setup(){
   
   // just testing
   delay(4000); // wait 4 seconds to manually align the mouse
-
   Serial.print("Setup Complete");
 }
 
@@ -238,7 +245,7 @@ void loop(){
     }
     else if (!turn_adj) {
       // continue movement
-      if (!rCorr && lDist < 3){
+      if (!rCorr && lDist < 4){
         // Too close to left wall.  Make rightward correction.
         Serial.print("FWD Rightward Correction\n");
 		set_lMotor_speed(1);
@@ -247,7 +254,7 @@ void loop(){
         lCorr = false;
         straight = false;
       }
-      else if (!lCorr && rDist < 3){
+      else if (!lCorr && rDist < 4){
         // Too close to right wall.  Make leftward correction.
         Serial.print(": FWD Leftward Correction\n");
         set_lMotor_speed(0.7);
@@ -256,7 +263,7 @@ void loop(){
         rCorr = false;
         straight = false;
       }
-      else if (!straight && rDist > 3 && lDist > 3){
+      else if (!straight && rDist > 4 && lDist > 4){
         // Mouse righted.  Continue at top speed.
         Serial.print(": Move Fwd Top Speed\n");
         set_lMotor_speed(1);
@@ -331,9 +338,9 @@ void loop(){
       stopped = false;
       mv_right_start = millis();
       set_lMotor_speed(1);
-      set_rMotor_speed(-0.15);
+      set_rMotor_speed(1);
 	}
-    else if (millis() - mv_right_start >= mv_right_duration){
+    else if (millis() - mv_right_start >= mv_right_duration + f_before_br90_duration){
       // stop movement
 	  Serial.print(": Right Turn Stop\n");	
       set_lMotor_speed(0);
@@ -343,6 +350,10 @@ void loop(){
       move_forward(f1_duration);
       // don't set stopped flag here, since we're doing
       // an immediate forward movement.
+    }
+    else if (millis() >= f_before_br90_duration){
+      set_lMotor_speed(1);
+      set_rMotor_speed(-0.15);
     }
   }
   
@@ -354,10 +365,10 @@ void loop(){
       mv_left = true;
       stopped = false;
       mv_left_start = millis();
-      set_lMotor_speed(-0.15);
+      set_lMotor_speed(1);
       set_rMotor_speed(1);
     }
-    else if (millis() - mv_left_start >= mv_left_duration){
+    else if (millis() - mv_left_start >= mv_left_duration + f_before_bl90_duration){
       // stop movement
 		Serial.print(": Left Turn Stop\n");	
       set_lMotor_speed(0);
@@ -367,6 +378,10 @@ void loop(){
       move_forward(f1_duration);
       // don't set stopped flag here, since we're doing
       // an immediate forward movement.
+    }    
+    else if (millis() >= f_before_bl90_duration){
+      set_lMotor_speed(-0.15);
+      set_rMotor_speed(1);
     }
   }
   
@@ -445,7 +460,7 @@ void loop(){
     // period after a left or right turn into a new cell.
     if (!turn_adj){
       // start our forward adjustment
-      turn_adj = false;
+      turn_adj = true;
       turn_adj_start = millis();
 	 // Serial.print(": Turn Adjustment Enabled\n");	
 
@@ -480,51 +495,51 @@ void loop(){
   // SIMPLE CONTROL ALGORITHM
 
 
-  if (!mv_right && !mv_left && !mv_bRight && !mv_bLeft) {
-    if (rDist > 9 && fDist < 4) {
-		Serial.print("Command Stop for Right Turn - " && (int)rDist && " / " && (int)fDist && "\n");
-		move_stop();
-
-      if (forward)
-	  {
-		  Serial.print("Begin Right Turn\n");        
-        turn_right(90);
-	  }
-      else
-	  {
-		  Serial.print("Begin Back Right Turn\n");        
-        turn_bRight(90);
-	  }
-
-    }
-    else if (lDist > 9 && fDist < 4) {
-      // go left
-		Serial.print("Command Stop for Left Turn\n");
-      move_stop();
-      if (forward)
-	  {
-       	  Serial.print("Begin Left Turn\n");        
-		  turn_left(90);
-	  }
-      else
-	  {
-		  Serial.print("Begin Back Left Turn\n");        
-        turn_bLeft(90);
-	  }
-    }
-    else if (stopped && fDist > 8) {
-      // go straight
-	  Serial.print("Command 1 Cell FWD\n");
-      move_forward(f1_duration);
-    }
-    else if (stopped && sensory_wall()) {
-      // dead end
-      move_backward(b1_duration);
-    }
-    else {
-      // ??????????
-    }
-  }
+//  if (!mv_right && !mv_left && !mv_bRight && !mv_bLeft) {
+//    if (rDist > 9 && fDist < 4) {
+//		Serial.print("Command Stop for Right Turn - " && (int)rDist && " / " && (int)fDist && "\n");
+//		move_stop();
+//
+//      if (forward)
+//	  {
+//		  Serial.print("Begin Right Turn\n");        
+//        turn_right(90);
+//	  }
+//      else
+//	  {
+//		  Serial.print("Begin Back Right Turn\n");        
+//        turn_bRight(90);
+//	  }
+//
+//    }
+//    else if (lDist > 9 && fDist < 4) {
+//      // go left
+//		Serial.print("Command Stop for Left Turn\n");
+//      move_stop();
+//      if (forward)
+//	  {
+//       	  Serial.print("Begin Left Turn\n");        
+//		  turn_left(90);
+//	  }
+//      else
+//	  {
+//		  Serial.print("Begin Back Left Turn\n");        
+//        turn_bLeft(90);
+//	  }
+//    }
+//    else if (stopped && fDist > 8) {
+//      // go straight
+//	  Serial.print("Command 1 Cell FWD\n");
+//      move_forward(f1_duration);
+//    }
+//    else if (stopped && sensory_wall()) {
+//      // dead end
+//      move_backward(b1_duration);
+//    }
+//    else {
+//      // ??????????
+//    }
+//  }
   
   delay(10);
 }
